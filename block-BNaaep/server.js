@@ -21,7 +21,6 @@ function handleRequest(req,res){
             fs.createReadStream(__dirname + '/about.html').pipe(res)
         } 
         else if(req.url.split('.').pop() === 'png'){
-            // console.log('HI');
             res.setHeader('Content-Type', `image/${req.url.split(".").pop()}`);
             fs.createReadStream(__dirname + req.url).pipe(res);
         }
@@ -49,8 +48,7 @@ function handleRequest(req,res){
                 })
             })
         }
-        else if(req.method === 'GET' && parsedURL.pathname === '/users'){
-            console.log(__dirname +'/contacts/'+parsedURL.query.username+'.json')
+        else if(req.method === 'GET' && parsedURL.pathname === '/users' && parsedURL.query.username){
             fs.readFile(__dirname +'/contacts/'+parsedURL.query.username+'.json', (err, user)=>{
                 if(err) return console.log(err);
 
@@ -63,6 +61,19 @@ function handleRequest(req,res){
                 res.end();
             })
         }
+        else if(req.method === 'GET' && parsedURL.pathname === '/users'){
+            let fileNames = fs.readdirSync(__dirname + "/contacts")
+            fileNames.forEach((fileName, i, arr)=>{
+                fs.readFile((__dirname + '/contacts/' + fileName),(err, content)=>{
+                    let stringifiedData = qs.parse(content.toString());
+                    let username = stringifiedData.username;
+                    res.write(`<a href="/users?username=${username}">${username}</a></br>`)
+                    if(arr.length === i) res.end();
+                })
+            })
+            
+        }
+        
     })
 }
 
